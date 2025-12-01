@@ -6,11 +6,12 @@ export type FilterBarProps = {
   faction?: string;
   rarity?: string;
   typeLine?: string;
+  cost?: string;
   limit?: number;
   disabled?: boolean;
 };
 
-export function FilterBar({ action, query, faction, rarity, typeLine, limit, disabled }: FilterBarProps) {
+export function FilterBar({ action, query, faction, rarity, typeLine, cost, limit, disabled }: FilterBarProps) {
   return (
     <form action={action} method="get" className="panel" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
       <input type="hidden" name="q" value={query ?? ''} />
@@ -20,40 +21,54 @@ export function FilterBar({ action, query, faction, rarity, typeLine, limit, dis
           <label className="muted" style={{ textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>
             Faction
           </label>
-        <input
-          type="text"
-          name="faction"
-          defaultValue={faction}
-          disabled={disabled}
-          placeholder="e.g. Arcane"
-          className="input"
-        />
+          <input
+            type="text"
+            name="faction"
+            defaultValue={faction}
+            disabled={disabled}
+            placeholder="e.g. Fury"
+            className="input"
+          />
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
           <label className="muted" style={{ textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>
             Rarity
           </label>
-        <input
-          type="text"
-          name="rarity"
-          defaultValue={rarity}
-          disabled={disabled}
-          placeholder="e.g. Rare"
-          className="input"
-        />
+          <input
+            type="text"
+            name="rarity"
+            defaultValue={rarity}
+            disabled={disabled}
+            placeholder="e.g. Rare"
+            className="input"
+          />
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
           <label className="muted" style={{ textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>
             Type
           </label>
-        <input
-          type="text"
-          name="type"
-          defaultValue={typeLine}
-          disabled={disabled}
-          placeholder="e.g. Unit"
-          className="input"
-        />
+          <input
+            type="text"
+            name="type"
+            defaultValue={typeLine}
+            disabled={disabled}
+            placeholder="e.g. Unit"
+            className="input"
+          />
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+          <label className="muted" style={{ textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>
+            Energy Cost
+          </label>
+          <input
+            type="number"
+            min={0}
+            name="cost"
+            defaultValue={cost}
+            disabled={disabled}
+            placeholder="e.g. 2"
+            className="input"
+          />
         </div>
         <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
           <button type="submit" disabled={disabled} className="btn" aria-disabled={disabled}>

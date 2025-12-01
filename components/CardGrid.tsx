@@ -5,14 +5,21 @@ function formatTypeLine(card: Card) {
   return card.typeLine || '—';
 }
 
+function formatCost(card: Card) {
+  const parts = [] as string[];
+  if (card.cost.energy !== null) parts.push(`${card.cost.energy} Energy`);
+  if (card.cost.power !== null) parts.push(`${card.cost.power} Power`);
+  return parts.join(' / ') || '—';
+}
+
 export function CardGrid({ cards }: { cards: Card[] }) {
   return (
     <div className="card-grid">
       {cards.map((card) => (
-        <div key={card.id} className="panel card-item">
+        <div key={card.cardId} className="panel card-item">
           <div className="card-meta">
             <div>
-              <Link href={`/card/${card.id}`} className="card-link" style={{ fontWeight: 700, fontSize: '1.1rem' }}>
+              <Link href={`/card/${card.cardId}`} className="card-link" style={{ fontWeight: 700, fontSize: '1.1rem' }}>
                 {card.name}
               </Link>
               <div className="badge" style={{ marginTop: '0.25rem' }}>{card.rarity ?? 'Unknown rarity'}</div>
@@ -40,6 +47,14 @@ export function CardGrid({ cards }: { cards: Card[] }) {
                   {card.set.name}
                 </Link>
               </dd>
+            </div>
+            <div>
+              <dt className="muted" style={{ fontWeight: 600 }}>Cost</dt>
+              <dd>{formatCost(card)}</dd>
+            </div>
+            <div>
+              <dt className="muted" style={{ fontWeight: 600 }}>Might</dt>
+              <dd>{card.might ?? '—'}</dd>
             </div>
           </dl>
         </div>

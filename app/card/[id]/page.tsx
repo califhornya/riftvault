@@ -6,7 +6,7 @@ import { getBaseUrl } from '@/lib/http';
 
 async function loadCard(id: string) {
   const baseUrl = getBaseUrl();
-  const res = await fetch(`${baseUrl}/api/v1/cards/${id}`, { cache: 'no-store' });
+  const res = await fetch(`${baseUrl}/api/cards/${id}`, { cache: 'no-store' });
   if (res.status === 404) {
     return null;
   }
@@ -15,6 +15,13 @@ async function loadCard(id: string) {
   }
   const json = (await res.json()) as { data: Card };
   return json.data;
+}
+
+function formatCost(card: Card) {
+  const entries = [] as string[];
+  if (card.cost.energy !== null) entries.push(`${card.cost.energy} Energy`);
+  if (card.cost.power !== null) entries.push(`${card.cost.power} Power`);
+  return entries.join(' / ') || '—';
 }
 
 export default async function CardPage({ params }: { params: { id: string } }) {
@@ -42,16 +49,13 @@ export default async function CardPage({ params }: { params: { id: string } }) {
             <h1 style={{ fontSize: '2rem', margin: 0 }}>{card.name}</h1>
             <div className="muted">{card.typeLine}</div>
             <div className="badge">{card.rarity ?? 'Unknown rarity'}</div>
+            <div className="muted">Card ID: {card.cardId}</div>
             <div className="muted">Faction: {card.faction ?? '—'}</div>
+            <div className="muted">Cost: {formatCost(card)}</div>
+            <div className="muted">Might: {card.might ?? '—'}</div>
             <div className="muted">
               Set: <Link href={`/sets/${card.set.code}`} className="nav-link">{card.set.name}</Link>
             </div>
-            {card.attack !== undefined && card.health !== undefined && (
-              <div style={{ display: 'flex', gap: '0.75rem' }}>
-                <span>ATK: {card.attack ?? '—'}</span>
-                <span>HP: {card.health ?? '—'}</span>
-              </div>
-            )}
           </div>
         </div>
         {card.text && <p style={{ marginTop: '1rem', whiteSpace: 'pre-wrap' }}>{card.text}</p>}

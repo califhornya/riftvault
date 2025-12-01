@@ -4,7 +4,7 @@ import { getBaseUrl } from '@/lib/http';
 
 async function loadSets() {
   const baseUrl = getBaseUrl();
-  const res = await fetch(`${baseUrl}/api/v1/sets`, { cache: 'no-store' });
+  const res = await fetch(`${baseUrl}/api/sets`, { cache: 'no-store' });
   if (!res.ok) {
     throw new Error('Failed to load sets');
   }

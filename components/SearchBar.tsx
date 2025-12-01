@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
-type Suggestion = { id: number; name: string };
+type Suggestion = { id: number; cardId: string; name: string };
 
 type SearchBarProps = {
   initialQuery?: string;
@@ -35,7 +35,7 @@ export function SearchBar({ initialQuery = '', placeholder = 'Search cards' }: S
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch(`/api/v1/cards/autocomplete?q=${encodeURIComponent(query)}`, {
+        const res = await fetch(`/api/search/autocomplete?q=${encodeURIComponent(query)}`, {
           signal: controller.signal,
           cache: 'no-store',
         });

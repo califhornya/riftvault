@@ -1,0 +1,41 @@
+// Prisma schema for Riftvault
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// The client will be generated in node_modules/.prisma/client
+// when running prisma generate
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model CardSet {
+  id         Int      @id @default(autoincrement())
+  code       String   @unique
+  name       String
+  releasedAt DateTime?
+  cards      Card[]
+
+  @@index([code])
+}
+
+model Card {
+  id        Int      @id @default(autoincrement())
+  name      String
+  typeLine  String
+  text      String?
+  faction   String?
+  rarity    String?
+  setId     Int
+  set       CardSet @relation(fields: [setId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([name])
+  @@index([faction])
+  @@index([rarity])
+  @@index([typeLine])
+}

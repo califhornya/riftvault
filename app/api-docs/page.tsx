@@ -40,6 +40,8 @@ export default function ApiDocsPage() {
       "text": "Flying, ward",
       "faction": "Arcane",
       "rarity": "Rare",
+      "collectorNumber": "ARC-001",
+      "imageUrl": "https://example.com/storm-drake.jpg",
       "set": { "id": 1, "code": "core", "name": "Core Set" }
     }
   ],
@@ -62,6 +64,8 @@ export default function ApiDocsPage() {
     "text": "First strike",
     "faction": "Valor",
     "rarity": "Uncommon",
+    "collectorNumber": "VAL-042",
+    "imageUrl": null,
     "set": { "id": 2, "code": "valor", "name": "Valor Rising" }
   }
 }`)}

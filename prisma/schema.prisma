@@ -29,6 +29,8 @@ model Card {
   text      String?
   faction   String?
   rarity    String?
+  collectorNumber String?
+  imageUrl  String?
   setId     Int
   set       CardSet @relation(fields: [setId], references: [id])
   createdAt DateTime @default(now())

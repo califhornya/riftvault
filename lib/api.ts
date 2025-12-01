@@ -5,6 +5,7 @@ export type Card = {
   text?: string | null;
   faction?: string | null;
   rarity?: string | null;
+  collectorNumber?: string | null;
   set: { id: number; code: string; name: string };
   imageUrl?: string | null;
   attack?: number | null;

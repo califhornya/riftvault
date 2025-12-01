@@ -55,6 +55,7 @@ async function main() {
         text: card.rules_text,
         faction: card.domain,
         rarity: rarity ?? undefined,
+        collectorNumber: card.card_id,
         setId: setRecord.id,
       },
     });

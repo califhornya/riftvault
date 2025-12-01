@@ -1,6 +1,8 @@
+import { PrismaClient } from '@prisma/client';
 import { readFileSync } from 'fs';
 import path from 'path';
-import prisma from '@/lib/prisma';
+
+const prisma = new PrismaClient();
 
 type CardVariant = {
   variant_id?: string;
@@ -29,24 +31,34 @@ async function main() {
 
   const setMap = new Map<string, CardSetRecord>();
 
+  await prisma.card.deleteMany();
+  await prisma.cardSet.deleteMany();
+
   for (const card of cards) {
-    const code = card.set.toLowerCase().replace(/\s+/g, '-');
-    let setRecord = setMap.get(code);
+    const cardId = card.card_id ?? card.variants?.[0]?.variant_id;
+
+    if (!cardId) {
+      throw new Error(`Card ID is missing for card ${card.name}`);
+    }
+
+    const [setCode] = cardId.split('-');
+    let setRecord = setMap.get(setCode);
 
     if (!setRecord) {
       const set = await prisma.cardSet.upsert({
-        where: { code },
+        where: { code: setCode },
         update: {},
         create: {
-          code,
+          code: setCode,
           name: card.set,
         },
       });
       setRecord = { id: set.id, code: set.code };
-      setMap.set(code, setRecord);
+      setMap.set(setCode, setRecord);
     }
 
     const rarity = card.variants && card.variants.length > 0 ? card.variants[0].rarity : undefined;
+    const imageUrl = `/cards/${setRecord.code}/${cardId}.webp`;
 
     await prisma.card.create({
       data: {
@@ -55,7 +67,8 @@ async function main() {
         text: card.rules_text,
         faction: card.domain,
         rarity: rarity ?? undefined,
-        collectorNumber: card.card_id,
+        collectorNumber: cardId,
+        imageUrl,
         setId: setRecord.id,
       },
     });

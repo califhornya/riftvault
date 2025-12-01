@@ -1,15 +1,25 @@
+export type CardVariant = {
+  id: number;
+  variantId: string;
+  rarity: string | null;
+};
+
 export type Card = {
   id: number;
+  cardId: string;
   name: string;
   typeLine: string;
-  text?: string | null;
-  faction?: string | null;
-  rarity?: string | null;
-  collectorNumber?: string | null;
+  text: string | null;
+  cost: {
+    energy: number | null;
+    power: number | null;
+  };
+  might: number | null;
+  faction: string | null;
+  rarity: string | null;
   set: { id: number; code: string; name: string };
-  imageUrl?: string | null;
-  attack?: number | null;
-  health?: number | null;
+  imageUrl: string | null;
+  variants: CardVariant[];
 };
 
 export type CardsResponse = {

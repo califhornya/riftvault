@@ -12,9 +12,9 @@ generator client {
   provider = "prisma-client-js"
 }
 
-model CardSet {
-  id         Int      @id @default(autoincrement())
-  code       String   @unique
+model Set {
+  id         Int       @id @default(autoincrement())
+  code       String    @unique
   name       String
   releasedAt DateTime?
   cards      Card[]
@@ -22,22 +22,67 @@ model CardSet {
   @@index([code])
 }
 
+model Faction {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  cards Card[]
+}
+
+model Rarity {
+  id       Int           @id @default(autoincrement())
+  name     String        @unique
+  variants CardVariant[]
+}
+
+model Keyword {
+  id     Int           @id @default(autoincrement())
+  name   String        @unique
+  cards  CardKeyword[]
+}
+
 model Card {
-  id        Int      @id @default(autoincrement())
-  name      String
-  typeLine  String
-  text      String?
-  faction   String?
-  rarity    String?
-  collectorNumber String?
-  imageUrl  String?
-  setId     Int
-  set       CardSet @relation(fields: [setId], references: [id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          Int            @id @default(autoincrement())
+  cardId      String         @unique
+  name        String
+  typeLine    String
+  rulesText   String?
+  costEnergy  Int?
+  costPower   Int?
+  might       Int?
+  imageUrl    String?
+  setId       Int
+  factionId   Int?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  set       Set      @relation(fields: [setId], references: [id])
+  faction   Faction? @relation(fields: [factionId], references: [id])
+  variants  CardVariant[]
+  keywords  CardKeyword[]
 
   @@index([name])
-  @@index([faction])
-  @@index([rarity])
   @@index([typeLine])
+}
+
+model CardVariant {
+  id        Int     @id @default(autoincrement())
+  variantId String  @unique
+  rarityId  Int?
+  cardId    Int
+
+  rarity Rarity? @relation(fields: [rarityId], references: [id])
+  card   Card    @relation(fields: [cardId], references: [id])
+
+  @@index([rarityId])
+  @@index([cardId])
+}
+
+model CardKeyword {
+  cardId    Int
+  keywordId Int
+
+  card    Card    @relation(fields: [cardId], references: [id])
+  keyword Keyword @relation(fields: [keywordId], references: [id])
+
+  @@id([cardId, keywordId])
 }

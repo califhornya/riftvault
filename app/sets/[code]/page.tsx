@@ -12,7 +12,7 @@ async function loadSet(code: string, searchParams: { [key: string]: string | str
   if (typeof page === 'string') params.set('page', page);
   if (typeof limit === 'string') params.set('limit', limit);
   const qs = params.toString();
-  const res = await fetch(`${baseUrl}/api/v1/sets/${code}${qs ? `?${qs}` : ''}`, { cache: 'no-store' });
+  const res = await fetch(`${baseUrl}/api/sets/${code}${qs ? `?${qs}` : ''}`, { cache: 'no-store' });
   if (res.status === 404) {
     return null;
   }
@@ -43,6 +43,7 @@ export default async function SetDetailPage({ params, searchParams }: { params: 
 
   const page = data?.page ?? Number(searchParams.page ?? 1) ?? 1;
   const limit = data?.limit ?? Number(searchParams.limit ?? 20) ?? 20;
+  const cost = typeof searchParams.cost === 'string' ? searchParams.cost : undefined;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -51,7 +52,7 @@ export default async function SetDetailPage({ params, searchParams }: { params: 
         <p className="muted">Set code: {data?.set.code ?? params.code}</p>
       </header>
 
-      <FilterBar action={`/sets/${params.code}`} limit={limit} disabled query={undefined} />
+      <FilterBar action={`/sets/${params.code}`} limit={limit} disabled query={undefined} cost={cost} />
       {error && <div className="panel" style={{ borderColor: '#fbbf24', color: '#fcd34d' }}>{error}</div>}
 
       {!error && data && data.data.length === 0 && (

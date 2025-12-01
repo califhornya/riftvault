@@ -6,7 +6,7 @@ import type { CardsResponse } from '@/lib/api';
 
 function buildCardsUrl(searchParams: { [key: string]: string | string[] | undefined }, baseUrl: string) {
   const params = new URLSearchParams();
-  const keys: Array<keyof typeof searchParams> = ['q', 'page', 'limit', 'faction', 'rarity', 'type'];
+  const keys: Array<keyof typeof searchParams> = ['q', 'page', 'limit', 'faction', 'rarity', 'type', 'cost'];
   keys.forEach((key) => {
     const value = searchParams[key];
     if (!value) return;
@@ -17,7 +17,7 @@ function buildCardsUrl(searchParams: { [key: string]: string | string[] | undefi
     }
   });
   const query = params.toString();
-  return `${baseUrl}/api/v1/cards${query ? `?${query}` : ''}`;
+  return `${baseUrl}/api/cards${query ? `?${query}` : ''}`;
 }
 
 async function loadCards(searchParams: { [key: string]: string | string[] | undefined }) {
@@ -46,6 +46,7 @@ export default async function Home({ searchParams }: { searchParams: { [key: str
   const faction = typeof searchParams.faction === 'string' ? searchParams.faction : undefined;
   const rarity = typeof searchParams.rarity === 'string' ? searchParams.rarity : undefined;
   const typeLine = typeof searchParams.type === 'string' ? searchParams.type : undefined;
+  const cost = typeof searchParams.cost === 'string' ? searchParams.cost : undefined;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -60,6 +61,7 @@ export default async function Home({ searchParams }: { searchParams: { [key: str
         faction={faction}
         rarity={rarity}
         typeLine={typeLine}
+        cost={cost}
         limit={limit}
       />
 
@@ -76,7 +78,7 @@ export default async function Home({ searchParams }: { searchParams: { [key: str
           page={data.page}
           limit={data.limit}
           total={data.total}
-          searchParams={{ ...searchParams, q: query, faction, rarity, type: typeLine }}
+          searchParams={{ ...searchParams, q: query, faction, rarity, type: typeLine, cost }}
           basePath="/"
         />
       )}

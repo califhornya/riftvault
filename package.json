@@ -9,7 +9,8 @@
     "lint": "next lint",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
-    "import:cards": "ts-node scripts/import-cards.ts"
+    "db:push": "prisma db push",
+    "seed": "tsx scripts/seed.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.19.0",
@@ -20,6 +21,7 @@
   "devDependencies": {
     "prisma": "^5.19.0",
     "ts-node": "^10.9.2",
+    "tsx": "^4.19.2",
     "typescript": "^5.4.0"
   }
 }

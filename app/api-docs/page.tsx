@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-const baseUrl = '/api/v1';
+const baseUrl = '/api';
 
 const codeBlock = (content: string) => (
   <pre
@@ -29,65 +29,52 @@ export default function ApiDocsPage() {
       <section className="panel" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
         <h2 style={{ margin: 0 }}>Cards</h2>
         <p className="muted">Search and paginate through cards with text search and filters.</p>
-        {codeBlock(`GET ${baseUrl}/cards?q=dragon&faction=arcane&rarity=rare&type=unit&page=1&limit=20`)}
+        {codeBlock(`GET ${baseUrl}/cards?q=vi&faction=Fury&rarity=Showcase&type=Champion&cost=2&page=1&limit=20`)}
         <p className="muted">Response</p>
         {codeBlock(`{
   "data": [
     {
       "id": 1,
-      "name": "Storm Drake",
-      "typeLine": "Unit — Dragon",
-      "text": "Flying, ward",
-      "faction": "Arcane",
-      "rarity": "Rare",
-      "collectorNumber": "ARC-001",
-      "imageUrl": "https://example.com/storm-drake.jpg",
-      "set": { "id": 1, "code": "core", "name": "Core Set" }
+      "cardId": "ARC-001",
+      "name": "Vi Destructive",
+      "typeLine": "Champion",
+      "text": "...rules text...",
+      "cost": { "energy": 2, "power": 1 },
+      "might": 3,
+      "faction": "Fury",
+      "rarity": "Showcase",
+      "set": { "id": 1, "code": "ARC", "name": "Arcane Box Set" },
+      "imageUrl": "/cards/ARC/ARC-001.webp",
+      "variants": [
+        { "id": 1, "variantId": "ARC-001", "rarity": "Showcase" }
+      ]
     }
   ],
   "page": 1,
   "limit": 20,
-  "total": 120
+  "total": 347
 }`)}
       </section>
 
       <section className="panel" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
         <h2 style={{ margin: 0 }}>Card detail</h2>
-        <p className="muted">Fetch a single card by id.</p>
-        {codeBlock(`GET ${baseUrl}/cards/42`)}
+        <p className="muted">Fetch a single card by its cardId or numeric id.</p>
+        {codeBlock(`GET ${baseUrl}/cards/ARC-001`)}
         <p className="muted">Response</p>
-        {codeBlock(`{
-  "data": {
-    "id": 42,
-    "name": "Blade Adept",
-    "typeLine": "Unit — Warrior",
-    "text": "First strike",
-    "faction": "Valor",
-    "rarity": "Uncommon",
-    "collectorNumber": "VAL-042",
-    "imageUrl": null,
-    "set": { "id": 2, "code": "valor", "name": "Valor Rising" }
-  }
-}`)}
+        {codeBlock(`{ "data": { /* same shape as cards list */ } }`)}
       </section>
 
       <section className="panel" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
         <h2 style={{ margin: 0 }}>Autocomplete</h2>
-        <p className="muted">Retrieve up to ten matching card names for live suggestions.</p>
-        {codeBlock(`GET ${baseUrl}/cards/autocomplete?q=storm`)}
+        <p className="muted">Retrieve up to twenty matching card names for live suggestions.</p>
+        {codeBlock(`GET ${baseUrl}/search/autocomplete?q=storm`)}
         <p className="muted">Response</p>
-        {codeBlock(`{
-  "data": [
-    { "id": 1, "name": "Storm Drake" },
-    { "id": 8, "name": "Storm Herald" }
-  ],
-  "total": 2
-}`)}
+        {codeBlock(`{ "data": [ { "id": 1, "cardId": "ARC-001", "name": "Storm Caller" } ], "total": 1 }`)}
       </section>
 
       <section className="panel" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
         <h2 style={{ margin: 0 }}>Sets</h2>
-        <p className="muted">List and browse individual sets.</p>
+        <p className="muted">List sets or fetch cards within a single set.</p>
         {codeBlock(`GET ${baseUrl}/sets`)}
         <p className="muted">Single set with cards</p>
         {codeBlock(`GET ${baseUrl}/sets/{code}?page=1&limit=20`)}
@@ -97,7 +84,7 @@ export default function ApiDocsPage() {
   "page": 1,
   "limit": 20,
   "total": 50,
-  "set": { "id": 3, "code": "arcane", "name": "Arcane Tempest", "cardCount": 50 }
+  "set": { "id": 3, "code": "ARC", "name": "Arcane Box Set", "cardCount": 50 }
 }`)}
       </section>
 

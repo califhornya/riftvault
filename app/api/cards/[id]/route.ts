@@ -17,6 +17,7 @@ export async function GET(_request: NextRequest, { params }: { params: { id: str
         set: true,
         faction: true,
         variants: { include: { rarity: true }, orderBy: { variantId: 'asc' } },
+        keywords: { include: { keyword: true } },
       },
     });
 

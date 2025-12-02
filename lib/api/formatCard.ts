@@ -1,4 +1,4 @@
-import type { Card, CardVariant, Faction, Rarity, Set } from '@prisma/client';
+import type { Card, CardKeyword, CardVariant, Faction, Keyword, Rarity, Set } from '@prisma/client';
 
 export type FormattedCard = {
   id: number;
@@ -18,6 +18,7 @@ export type FormattedCard = {
     id: number;
     name: string;
   };
+  keywords: string[];
   variants: {
     variantId: string | null;
     rarity: string | null;
@@ -28,6 +29,7 @@ export type CardWithRelations = Card & {
   set: Set;
   faction: Faction | null;
   variants: (CardVariant & { rarity: Rarity | null })[];
+  keywords: (CardKeyword & { keyword: Keyword })[];
 };
 
 export function formatCard(card: CardWithRelations): FormattedCard {
@@ -52,6 +54,7 @@ export function formatCard(card: CardWithRelations): FormattedCard {
       id: card.set.id,
       name: card.set.name,
     },
+    keywords: (card.keywords ?? []).map(({ keyword }) => keyword.name),
     variants: variants.map((variant) => ({
       variantId: variant.variantId ?? null,
       rarity: variant.rarity?.name ?? null,

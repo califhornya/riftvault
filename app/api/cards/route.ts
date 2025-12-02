@@ -111,6 +111,7 @@ export async function GET(request: NextRequest) {
           set: true,
           faction: true,
           variants: { include: { rarity: true }, orderBy: { variantId: 'asc' } },
+          keywords: { include: { keyword: true } },
         },
       }),
       prisma.card.count({ where: filters.where }),

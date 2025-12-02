@@ -43,8 +43,8 @@ function buildFilters(searchParams: URLSearchParams) {
   if (q && q.length > 0) {
     andFilters.push({
       OR: [
-        { name: { contains: q, mode: 'insensitive' } },
-        { rulesText: { contains: q, mode: 'insensitive' } },
+        { name: { contains: q } },
+        { rulesText: { contains: q } },
       ],
     });
   }
@@ -52,8 +52,8 @@ function buildFilters(searchParams: URLSearchParams) {
   if (faction && faction.length > 0) {
     andFilters.push({
       OR: [
-        { faction: { name: { equals: faction, mode: 'insensitive' } } },
-        { domain: { equals: faction, mode: 'insensitive' } },
+        { faction: { name: faction } },
+        { domain: { equals: faction } },
       ],
     });
   }
@@ -61,13 +61,13 @@ function buildFilters(searchParams: URLSearchParams) {
   if (rarity && rarity.length > 0) {
     andFilters.push({
       variants: {
-        some: { rarity: { name: { equals: rarity, mode: 'insensitive' } } },
+        some: { rarity: { name: rarity } },
       },
     });
   }
 
   if (type && type.length > 0) {
-    andFilters.push({ type: { contains: type, mode: 'insensitive' } });
+    andFilters.push({ type: { contains: type } });
   }
 
   if (costParam !== null) {

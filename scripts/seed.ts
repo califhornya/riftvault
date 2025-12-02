@@ -15,6 +15,7 @@ type RawCard = {
   name: string;
   type: string;
   domain?: string;
+  keywords?: string[];
   cost?: {
     energy?: number;
     power?: number;
@@ -53,6 +54,7 @@ function buildLookups(cards: RawCard[]) {
   const setNames = new Set<string>();
   const factionNames = new Set<string>();
   const rarityNames = new Set<string>();
+  const keywordNames = new Set<string>();
 
   for (const card of cards) {
     if (card.set) {
@@ -67,45 +69,64 @@ function buildLookups(cards: RawCard[]) {
       ?.map((variant) => variant.rarity?.trim())
       .filter((rarity): rarity is string => Boolean(rarity && rarity.length > 0))
       .forEach((rarity) => rarityNames.add(rarity));
+
+    card.keywords?.forEach((keyword) => {
+      const trimmed = keyword.trim();
+
+      if (trimmed.length > 0) {
+        keywordNames.add(trimmed);
+      }
+    });
   }
 
   return {
     setNames: Array.from(setNames),
     factionNames: Array.from(factionNames),
     rarityNames: Array.from(rarityNames),
+    keywordNames: Array.from(keywordNames),
   };
 }
 
-async function seedReferenceTables(setNames: string[], factionNames: string[], rarityNames: string[]) {
+async function seedReferenceTables(
+  setNames: string[],
+  factionNames: string[],
+  rarityNames: string[],
+  keywordNames: string[]
+) {
   await prisma.set.createMany({
     data: setNames.map((name) => ({ name })),
-    skipDuplicates: true,
   });
 
   await prisma.faction.createMany({
     data: factionNames.map((name) => ({ name })),
-    skipDuplicates: true,
   });
 
   if (rarityNames.length > 0) {
     await prisma.rarity.createMany({
       data: rarityNames.map((name) => ({ name })),
-      skipDuplicates: true,
+    });
+  }
+
+  if (keywordNames.length > 0) {
+    await prisma.keyword.createMany({
+      data: keywordNames.map((name) => ({ name })),
     });
   }
 }
 
 async function buildRelationMaps() {
-  const [sets, factions, rarities] = await Promise.all([
+  const [sets, factions, rarities, keywords] = await Promise.all([
     prisma.set.findMany({ select: { id: true, name: true } }),
     prisma.faction.findMany({ select: { id: true, name: true } }),
     prisma.rarity.findMany({ select: { id: true, name: true } }),
+    prisma.keyword.findMany({ select: { id: true, name: true } }),
   ]);
 
   return {
     setMap: new Map(sets.map((set) => [set.name, set.id])),
     factionMap: new Map(factions.map((faction) => [faction.name, faction.id])),
     rarityMap: new Map(rarities.map((rarity) => [rarity.name, rarity.id])),
+    keywordMap: new Map(keywords.map((keyword) => [keyword.name, keyword.id])),
   };
 }
 
@@ -113,7 +134,8 @@ function buildCardData(
   cards: RawCard[],
   setMap: Map<string, number>,
   factionMap: Map<string, number>,
-  rarityMap: Map<string, number>
+  rarityMap: Map<string, number>,
+  keywordMap: Map<string, number>
 ) {
   return cards.map((card) => {
     const cardId = card.card_id ?? card.variants?.[0]?.variant_id;
@@ -138,6 +160,10 @@ function buildCardData(
       return { variantId, rarityId };
     });
 
+    const keywordIds = (card.keywords ?? [])
+      .map((keyword) => keywordMap.get(keyword.trim()))
+      .filter((keywordId): keywordId is number => Boolean(keywordId));
+
     return {
       cardData: {
         cardId,
@@ -152,19 +178,20 @@ function buildCardData(
         factionId,
       },
       variants,
+      keywordIds,
     };
   });
 }
 
 async function main() {
   const cards = loadCards();
-  const { setNames, factionNames, rarityNames } = buildLookups(cards);
+  const { setNames, factionNames, rarityNames, keywordNames } = buildLookups(cards);
 
   await resetDatabase();
-  await seedReferenceTables(setNames, factionNames, rarityNames);
+  await seedReferenceTables(setNames, factionNames, rarityNames, keywordNames);
 
-  const { setMap, factionMap, rarityMap } = await buildRelationMaps();
-  const cardRows = buildCardData(cards, setMap, factionMap, rarityMap);
+  const { setMap, factionMap, rarityMap, keywordMap } = await buildRelationMaps();
+  const cardRows = buildCardData(cards, setMap, factionMap, rarityMap, keywordMap);
 
   for (const card of cardRows) {
     await prisma.card.create({
@@ -176,11 +203,18 @@ async function main() {
             rarity: variant.rarityId ? { connect: { id: variant.rarityId } } : undefined,
           })),
         },
+        keywords: {
+          create: card.keywordIds.map((keywordId) => ({
+            keyword: { connect: { id: keywordId } },
+          })),
+        },
       },
     });
   }
 
-  console.log(`Seed completed: ${setNames.length} sets, ${factionNames.length} factions, ${rarityNames.length} rarities, ${cardRows.length} cards.`);
+  console.log(
+    `Seed completed: ${setNames.length} sets, ${factionNames.length} factions, ${rarityNames.length} rarities, ${keywordNames.length} keywords, ${cardRows.length} cards.`
+  );
 }
 
 main()

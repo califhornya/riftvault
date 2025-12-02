@@ -59,7 +59,11 @@ function buildFilters(searchParams: URLSearchParams) {
   }
 
   if (rarity && rarity.length > 0) {
-    andFilters.push({ variants: { contains: rarity, mode: 'insensitive' } });
+    andFilters.push({
+      variants: {
+        some: { rarity: { name: { equals: rarity, mode: 'insensitive' } } },
+      },
+    });
   }
 
   if (type && type.length > 0) {
@@ -103,7 +107,11 @@ export async function GET(request: NextRequest) {
         skip: pagination.skip,
         take: pagination.limit,
         orderBy: { id: 'asc' },
-        include: { set: true, faction: true },
+        include: {
+          set: true,
+          faction: true,
+          variants: { include: { rarity: true }, orderBy: { variantId: 'asc' } },
+        },
       }),
       prisma.card.count({ where: filters.where }),
     ]);

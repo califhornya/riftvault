@@ -13,7 +13,11 @@ export async function GET(_request: NextRequest, { params }: { params: { id: str
   try {
     const card = await prisma.card.findUnique({
       where: { id },
-      include: { set: true, faction: true },
+      include: {
+        set: true,
+        faction: true,
+        variants: { include: { rarity: true }, orderBy: { variantId: 'asc' } },
+      },
     });
 
     if (!card) {

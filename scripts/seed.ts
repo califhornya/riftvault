@@ -6,6 +6,7 @@ const prisma = new PrismaClient();
 
 type CardVariant = {
   variant_id?: string;
+  variantId?: string;
   rarity?: string;
 };
 
@@ -38,6 +39,7 @@ function loadCards(): RawCard[] {
 
 async function resetDatabase() {
   await prisma.$transaction([
+    prisma.cardVariant.deleteMany(),
     prisma.cardKeyword.deleteMany(),
     prisma.card.deleteMany(),
     prisma.keyword.deleteMany(),
@@ -61,11 +63,10 @@ function buildLookups(cards: RawCard[]) {
       factionNames.add(card.domain);
     }
 
-    for (const variant of card.variants ?? []) {
-      if (variant.rarity) {
-        rarityNames.add(variant.rarity);
-      }
-    }
+    card.variants
+      ?.map((variant) => variant.rarity?.trim())
+      .filter((rarity): rarity is string => Boolean(rarity && rarity.length > 0))
+      .forEach((rarity) => rarityNames.add(rarity));
   }
 
   return {
@@ -95,18 +96,25 @@ async function seedReferenceTables(setNames: string[], factionNames: string[], r
 }
 
 async function buildRelationMaps() {
-  const [sets, factions] = await Promise.all([
+  const [sets, factions, rarities] = await Promise.all([
     prisma.set.findMany({ select: { id: true, name: true } }),
     prisma.faction.findMany({ select: { id: true, name: true } }),
+    prisma.rarity.findMany({ select: { id: true, name: true } }),
   ]);
 
   return {
     setMap: new Map(sets.map((set) => [set.name, set.id])),
     factionMap: new Map(factions.map((faction) => [faction.name, faction.id])),
+    rarityMap: new Map(rarities.map((rarity) => [rarity.name, rarity.id])),
   };
 }
 
-function mapCardsToRows(cards: RawCard[], setMap: Map<string, number>, factionMap: Map<string, number>) {
+function buildCardData(
+  cards: RawCard[],
+  setMap: Map<string, number>,
+  factionMap: Map<string, number>,
+  rarityMap: Map<string, number>
+) {
   return cards.map((card) => {
     const cardId = card.card_id ?? card.variants?.[0]?.variant_id;
 
@@ -122,18 +130,28 @@ function mapCardsToRows(cards: RawCard[], setMap: Map<string, number>, factionMa
 
     const factionId = card.domain ? factionMap.get(card.domain) ?? null : null;
 
+    const variants = (card.variants ?? []).map((variant) => {
+      const variantId = variant.variant_id ?? variant.variantId ?? cardId;
+      const rarityName = variant.rarity?.trim();
+      const rarityId = rarityName ? rarityMap.get(rarityName) ?? null : null;
+
+      return { variantId, rarityId };
+    });
+
     return {
-      cardId,
-      name: card.name,
-      type: card.type,
-      domain: card.domain ?? null,
-      costEnergy: card.cost?.energy ?? null,
-      costPower: card.cost?.power ?? null,
-      might: card.might ?? null,
-      rulesText: card.rules_text ?? null,
-      variants: JSON.stringify(card.variants ?? []),
-      setId,
-      factionId,
+      cardData: {
+        cardId,
+        name: card.name,
+        type: card.type,
+        domain: card.domain ?? null,
+        costEnergy: card.cost?.energy ?? null,
+        costPower: card.cost?.power ?? null,
+        might: card.might ?? null,
+        rulesText: card.rules_text ?? null,
+        setId,
+        factionId,
+      },
+      variants,
     };
   });
 }
@@ -145,13 +163,22 @@ async function main() {
   await resetDatabase();
   await seedReferenceTables(setNames, factionNames, rarityNames);
 
-  const { setMap, factionMap } = await buildRelationMaps();
-  const cardRows = mapCardsToRows(cards, setMap, factionMap);
+  const { setMap, factionMap, rarityMap } = await buildRelationMaps();
+  const cardRows = buildCardData(cards, setMap, factionMap, rarityMap);
 
-  await prisma.card.createMany({
-    data: cardRows,
-    skipDuplicates: true,
-  });
+  for (const card of cardRows) {
+    await prisma.card.create({
+      data: {
+        ...card.cardData,
+        variants: {
+          create: card.variants.map((variant) => ({
+            variantId: variant.variantId,
+            rarity: variant.rarityId ? { connect: { id: variant.rarityId } } : undefined,
+          })),
+        },
+      },
+    });
+  }
 
   console.log(`Seed completed: ${setNames.length} sets, ${factionNames.length} factions, ${rarityNames.length} rarities, ${cardRows.length} cards.`);
 }

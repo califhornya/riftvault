@@ -1,10 +1,4 @@
-import type { Card, Faction, Set } from '@prisma/client';
-
-type RawVariant = {
-  variant_id?: string;
-  variantId?: string;
-  rarity?: string;
-};
+import type { Card, CardVariant, Faction, Rarity, Set } from '@prisma/client';
 
 export type FormattedCard = {
   id: number;
@@ -30,27 +24,14 @@ export type FormattedCard = {
   }[];
 };
 
-export type CardWithRelations = Card & { set: Set; faction: Faction | null };
-
-function parseVariants(variants: string | null) {
-  if (!variants) {
-    return [] as RawVariant[];
-  }
-
-  try {
-    const parsed = JSON.parse(variants) as RawVariant[];
-    if (Array.isArray(parsed)) {
-      return parsed;
-    }
-    return [] as RawVariant[];
-  } catch (error) {
-    console.warn('Failed to parse variants JSON', error);
-    return [] as RawVariant[];
-  }
-}
+export type CardWithRelations = Card & {
+  set: Set;
+  faction: Faction | null;
+  variants: (CardVariant & { rarity: Rarity | null })[];
+};
 
 export function formatCard(card: CardWithRelations): FormattedCard {
-  const variants = parseVariants(card.variants ?? null);
+  const variants = card.variants ?? [];
   const primaryVariant = variants[0];
 
   return {
@@ -61,7 +42,7 @@ export function formatCard(card: CardWithRelations): FormattedCard {
     typeLine: card.type,
     text: card.rulesText ?? null,
     faction: card.faction?.name ?? card.domain ?? null,
-    rarity: primaryVariant?.rarity ?? null,
+    rarity: primaryVariant?.rarity?.name ?? null,
     cost: {
       energy: card.costEnergy ?? null,
       power: card.costPower ?? null,
@@ -72,8 +53,8 @@ export function formatCard(card: CardWithRelations): FormattedCard {
       name: card.set.name,
     },
     variants: variants.map((variant) => ({
-      variantId: variant.variant_id ?? variant.variantId ?? null,
-      rarity: variant.rarity ?? null,
+      variantId: variant.variantId ?? null,
+      rarity: variant.rarity?.name ?? null,
     })),
   };
 }

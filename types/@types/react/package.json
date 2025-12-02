@@ -1,0 +1,6 @@
+{
+  "name": "@types/react",
+  "version": "0.0.0-stub",
+  "types": "index.d.ts",
+  "main": "index.js"
+}

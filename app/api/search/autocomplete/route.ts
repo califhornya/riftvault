@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
     return badRequest('Query parameter "q" is required');
   }
 
-  const where = { name: { contains: q, mode: 'insensitive' as const } };
+  const where = { name: { contains: q } };
 
   try {
     const [matches, total] = await Promise.all([

@@ -6,7 +6,7 @@ import { getBaseUrl } from '@/lib/http';
 
 async function loadCard(id: string) {
   const baseUrl = getBaseUrl();
-  const res = await fetch(`${baseUrl}/api/v1/cards/${id}`, { cache: 'no-store' });
+  const res = await fetch(`${baseUrl}/api/cards/${id}`, { cache: 'no-store' });
   if (res.status === 404) {
     return null;
   }
@@ -29,14 +29,9 @@ export default async function CardPage({ params }: { params: { id: string } }) {
       <div className="panel">
         <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
           <div style={{ height: '10rem', width: '8rem', overflow: 'hidden', borderRadius: '12px', border: '1px solid #1f2937', background: '#0b1224' }}>
-            {card.imageUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={card.imageUrl} alt={card.name} style={{ height: '100%', width: '100%', objectFit: 'cover' }} />
-            ) : (
-              <div className="muted" style={{ display: 'flex', height: '100%', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem' }}>
-                No image
-              </div>
-            )}
+            <div className="muted" style={{ display: 'flex', height: '100%', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem' }}>
+              No image
+            </div>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
             <h1 style={{ fontSize: '2rem', margin: 0 }}>{card.name}</h1>
@@ -44,12 +39,13 @@ export default async function CardPage({ params }: { params: { id: string } }) {
             <div className="badge">{card.rarity ?? 'Unknown rarity'}</div>
             <div className="muted">Faction: {card.faction ?? '—'}</div>
             <div className="muted">
-              Set: <Link href={`/sets/${card.set.code}`} className="nav-link">{card.set.name}</Link>
+              Set: <Link href={`/sets/${card.set.id}`} className="nav-link">{card.set.name}</Link>
             </div>
-            {card.attack !== undefined && card.health !== undefined && (
+            {(card.cost.energy !== null || card.cost.power !== null || card.might !== null) && (
               <div style={{ display: 'flex', gap: '0.75rem' }}>
-                <span>ATK: {card.attack ?? '—'}</span>
-                <span>HP: {card.health ?? '—'}</span>
+                {card.cost.energy !== null && <span>Energy: {card.cost.energy}</span>}
+                {card.cost.power !== null && <span>Power: {card.cost.power}</span>}
+                {card.might !== null && <span>Might: {card.might}</span>}
               </div>
             )}
           </div>

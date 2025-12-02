@@ -17,14 +17,6 @@ export function CardGrid({ cards }: { cards: Card[] }) {
               </Link>
               <div className="badge" style={{ marginTop: '0.25rem' }}>{card.rarity ?? 'Unknown rarity'}</div>
             </div>
-            <div className="card-thumb" aria-hidden>
-              {card.imageUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={card.imageUrl} alt={card.name} style={{ height: '100%', width: '100%', objectFit: 'cover', borderRadius: '10px' }} />
-              ) : (
-                <span>No image</span>
-              )}
-            </div>
           </div>
           <div className="card-text">{formatTypeLine(card)}</div>
           {card.text && <div className="subpanel card-text">{card.text}</div>}
@@ -36,7 +28,7 @@ export function CardGrid({ cards }: { cards: Card[] }) {
             <div>
               <dt className="muted" style={{ fontWeight: 600 }}>Set</dt>
               <dd>
-                <Link href={`/sets/${card.set.code}`} className="nav-link">
+                <Link href={`/sets/${card.set.id}`} className="nav-link">
                   {card.set.name}
                 </Link>
               </dd>

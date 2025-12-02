@@ -1,7 +1,7 @@
 import { CardGrid } from '@/components/CardGrid';
 import { FilterBar } from '@/components/FilterBar';
 import { Pagination } from '@/components/Pagination';
-import type { SetWithCards } from '@/lib/api';
+import type { CardsResponse, SetSummary } from '@/lib/api';
 import { getBaseUrl } from '@/lib/http';
 
 async function loadSet(code: string, searchParams: { [key: string]: string | string[] | undefined }) {
@@ -11,19 +11,34 @@ async function loadSet(code: string, searchParams: { [key: string]: string | str
   const limit = searchParams.limit;
   if (typeof page === 'string') params.set('page', page);
   if (typeof limit === 'string') params.set('limit', limit);
+  params.set('set', code);
   const qs = params.toString();
-  const res = await fetch(`${baseUrl}/api/v1/sets/${code}${qs ? `?${qs}` : ''}`, { cache: 'no-store' });
-  if (res.status === 404) {
+  const [cardsRes, setsRes] = await Promise.all([
+    fetch(`${baseUrl}/api/cards${qs ? `?${qs}` : ''}`, { cache: 'no-store' }),
+    fetch(`${baseUrl}/api/sets`, { cache: 'no-store' }),
+  ]);
+
+  if (!cardsRes.ok) {
+    throw new Error('Failed to load set cards');
+  }
+
+  if (!setsRes.ok) {
+    throw new Error('Failed to load set metadata');
+  }
+
+  const cards = (await cardsRes.json()) as CardsResponse;
+  const sets = (await setsRes.json()) as { data: SetSummary[] };
+  const set = sets.data.find((entry) => String(entry.id) === code);
+
+  if (!set) {
     return null;
   }
-  if (!res.ok) {
-    throw new Error('Failed to load set');
-  }
-  return (await res.json()) as SetWithCards;
+
+  return { ...cards, set } as const;
 }
 
 export default async function SetDetailPage({ params, searchParams }: { params: { code: string }; searchParams: { [key: string]: string | string[] | undefined } }) {
-  let data: SetWithCards | null = null;
+  let data: (CardsResponse & { set: SetSummary }) | null = null;
   let error: string | null = null;
 
   try {
@@ -36,7 +51,7 @@ export default async function SetDetailPage({ params, searchParams }: { params: 
     return (
       <div className="panel">
         <h1 style={{ fontSize: '1.5rem' }}>Set not found</h1>
-        <p className="muted">We could not find a set with code {params.code}.</p>
+        <p className="muted">We could not find a set with id {params.code}.</p>
       </div>
     );
   }
@@ -48,7 +63,7 @@ export default async function SetDetailPage({ params, searchParams }: { params: 
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
       <header>
         <h1 style={{ fontSize: '2rem', margin: 0 }}>{data?.set.name ?? 'Unknown set'}</h1>
-        <p className="muted">Set code: {data?.set.code ?? params.code}</p>
+        <p className="muted">Total cards: {data?.set.cardCount ?? 0}</p>
       </header>
 
       <FilterBar action={`/sets/${params.code}`} limit={limit} disabled query={undefined} />

@@ -1,16 +1,6 @@
-export type Card = {
-  id: number;
-  name: string;
-  typeLine: string;
-  text?: string | null;
-  faction?: string | null;
-  rarity?: string | null;
-  collectorNumber?: string | null;
-  set: { id: number; code: string; name: string };
-  imageUrl?: string | null;
-  attack?: number | null;
-  health?: number | null;
-};
+import type { FormattedCard } from './api/formatCard';
+
+export type Card = FormattedCard;
 
 export type CardsResponse = {
   data: Card[];
@@ -21,9 +11,7 @@ export type CardsResponse = {
 
 export type SetSummary = {
   id: number;
-  code: string;
   name: string;
-  releasedAt: string | null;
   cardCount: number;
 };
 

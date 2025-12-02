@@ -4,7 +4,7 @@ import { getBaseUrl } from '@/lib/http';
 
 async function loadSets() {
   const baseUrl = getBaseUrl();
-  const res = await fetch(`${baseUrl}/api/v1/sets`, { cache: 'no-store' });
+  const res = await fetch(`${baseUrl}/api/sets`, { cache: 'no-store' });
   if (!res.ok) {
     throw new Error('Failed to load sets');
   }
@@ -39,17 +39,15 @@ export default async function SetsPage() {
           {sets.map((set) => (
             <Link
               key={set.id}
-              href={`/sets/${set.code}`}
+              href={`/sets/${set.id}`}
               className="panel"
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
                   <h2 style={{ margin: 0 }}>{set.name}</h2>
-                  <p className="muted">Code: {set.code}</p>
                 </div>
                 <div className="badge" style={{ background: 'rgba(148, 163, 184, 0.2)', color: '#e2e8f0' }}>{set.cardCount} cards</div>
               </div>
-              {set.releasedAt && <p className="muted" style={{ marginTop: '0.4rem' }}>Released {new Date(set.releasedAt).toLocaleDateString()}</p>}
             </Link>
           ))}
         </div>

@@ -17,7 +17,7 @@ function buildCardsUrl(searchParams: { [key: string]: string | string[] | undefi
     }
   });
   const query = params.toString();
-  return `${baseUrl}/api/v1/cards${query ? `?${query}` : ''}`;
+  return `${baseUrl}/api/cards${query ? `?${query}` : ''}`;
 }
 
 async function loadCards(searchParams: { [key: string]: string | string[] | undefined }) {

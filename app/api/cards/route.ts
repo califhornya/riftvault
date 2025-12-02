@@ -35,6 +35,7 @@ function buildFilters(searchParams: URLSearchParams) {
   const faction = searchParams.get('faction')?.trim();
   const rarity = searchParams.get('rarity')?.trim();
   const type = searchParams.get('type')?.trim();
+  const set = searchParams.get('set');
   const costParam = searchParams.get('cost');
 
   const where: Prisma.CardWhereInput = {};
@@ -68,6 +69,15 @@ function buildFilters(searchParams: URLSearchParams) {
 
   if (type && type.length > 0) {
     andFilters.push({ type: { contains: type, mode: 'insensitive' } });
+  }
+
+  if (set !== null) {
+    const setId = Number(set);
+    if (!Number.isInteger(setId) || setId < 1) {
+      return { error: badRequest('Invalid set parameter') } as const;
+    }
+
+    andFilters.push({ setId });
   }
 
   if (costParam !== null) {

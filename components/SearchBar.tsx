@@ -3,8 +3,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
-type Suggestion = { id: number; name: string };
-
 type SearchBarProps = {
   initialQuery?: string;
   placeholder?: string;
@@ -15,7 +13,7 @@ export function SearchBar({ initialQuery = '', placeholder = 'Search cards' }: S
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [query, setQuery] = useState(initialQuery);
-  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -35,14 +33,14 @@ export function SearchBar({ initialQuery = '', placeholder = 'Search cards' }: S
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch(`/api/v1/cards/autocomplete?q=${encodeURIComponent(query)}`, {
+        const res = await fetch(`/api/search/autocomplete?q=${encodeURIComponent(query)}`, {
           signal: controller.signal,
           cache: 'no-store',
         });
         if (!res.ok) {
           throw new Error('Autocomplete failed');
         }
-        const json = (await res.json()) as { data?: Suggestion[] };
+        const json = (await res.json()) as { data?: string[] };
         setSuggestions(json.data ?? []);
       } catch (err) {
         if (!(err instanceof DOMException && err.name === 'AbortError')) {
@@ -109,9 +107,9 @@ export function SearchBar({ initialQuery = '', placeholder = 'Search cards' }: S
           {!loading && !error && suggestions.length === 0 && <div className="muted">No suggestions yet</div>}
           <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
             {suggestions.map((suggestion) => (
-              <li key={suggestion.id}>
-                <button type="button" className="suggestion-item" onClick={() => handleSuggestion(suggestion.name)}>
-                  {suggestion.name}
+              <li key={suggestion}>
+                <button type="button" className="suggestion-item" onClick={() => handleSuggestion(suggestion)}>
+                  {suggestion}
                 </button>
               </li>
             ))}
